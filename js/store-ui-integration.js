@@ -1,10 +1,35 @@
 /* =========================================================
    AGARWAL STORE
-   CODE 65 — MASTER STORE UI INTEGRATION
+   CODE 66 — STORE UI + CART + SEARCH UPGRADE
    ========================================================= */
 
 
 (async function () {
+
+  "use strict";
+
+
+  /* =======================================================
+     BASIC HELPERS
+     ======================================================= */
+
+  const $ = id =>
+    document.getElementById(id);
+
+
+  const store =
+    window.AgarwalStore;
+
+
+  if (!store) {
+
+    console.error(
+      "AgarwalStore is not ready."
+    );
+
+    return;
+
+  }
 
 
   /* =======================================================
@@ -34,62 +59,78 @@
 
 
   /* =======================================================
-     WAIT FOR CORE MODULES
+     WAIT FOR FIREBASE / STORAGE
      ======================================================= */
 
-  function waitForModules() {
+  async function waitForCore(
+    timeout = 10000
+  ) {
 
-    return new Promise(
-      resolve => {
-
-        if (
-          window.AgarwalFirestore &&
-          window.AgarwalCatalogueStorage &&
-          window.AgarwalProductStorage
-        ) {
-
-          resolve();
-
-          return;
-
-        }
+    const start =
+      Date.now();
 
 
-        window.addEventListener(
+    while (
 
-          "agarwal:modules-loaded",
+      Date.now() - start <
+      timeout
 
-          () => {
+    ) {
 
-            resolve();
+      if (
 
-          },
+        window.AgarwalFirestore &&
 
-          {
-            once: true
-          }
+        window.AgarwalCatalogueStorage &&
 
-        );
+        window.AgarwalProductStorage
+
+      ) {
+
+        return true;
 
       }
-    );
+
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            100
+          )
+      );
+
+    }
+
+
+    return false;
 
   }
 
 
-  await waitForModules();
+  const coreReady =
+    await waitForCore();
+
+
+  if (!coreReady) {
+
+    console.error(
+      "Agarwal Store core modules are not ready."
+    );
+
+    return;
+
+  }
 
 
   /* =======================================================
-     CREATE PRODUCT SECTION
+     PRODUCT SECTION
      ======================================================= */
 
   function createProductSection() {
 
     if (
-      document.getElementById(
-        "productSection"
-      )
+      $("productSection")
     ) {
 
       return;
@@ -98,9 +139,7 @@
 
 
     const catalogueGrid =
-      document.getElementById(
-        "catalogueGrid"
-      );
+      $("catalogueGrid");
 
 
     if (!catalogueGrid) {
@@ -158,51 +197,459 @@
     `;
 
 
-    catalogueGrid
-      .closest("section")
-      ?.after(section);
-
-
-    const style =
-      document.createElement(
-        "style"
+    const catalogueSection =
+      catalogueGrid.closest(
+        "section"
       );
 
 
-    style.textContent = `
+    if (
+      catalogueSection
+    ) {
 
-      #productSection {
+      catalogueSection.after(
+        section
+      );
 
-        margin-top:
-          30px;
+    } else {
 
-      }
+      document
+        .querySelector("main")
+        ?.appendChild(
+          section
+        );
 
-
-      #productCount {
-
-        font-size:
-          12px;
-
-        color:
-          #718179;
-
-        font-weight:
-          700;
-
-      }
-
-    `;
-
-
-    document.head.appendChild(
-      style
-    );
+    }
 
   }
 
 
   createProductSection();
+
+
+  /* =======================================================
+     PRODUCT COUNT
+     ======================================================= */
+
+  function updateProductCount(
+    count
+  ) {
+
+    const element =
+      $("productCount");
+
+
+    if (!element) {
+
+      return;
+
+    }
+
+
+    element.textContent =
+
+      `${count} ${
+        count === 1
+          ? "product"
+          : "products"
+      }`;
+
+  }
+
+
+  /* =======================================================
+     SHOW MESSAGE
+     ======================================================= */
+
+  function showMessage(
+    message
+  ) {
+
+    let toast =
+      $("agarwalStoreToast");
+
+
+    if (!toast) {
+
+      toast =
+        document.createElement(
+          "div"
+        );
+
+
+      toast.id =
+        "agarwalStoreToast";
+
+
+      toast.style.cssText = `
+
+        position:fixed;
+
+        left:50%;
+
+        bottom:22px;
+
+        transform:
+          translateX(-50%);
+
+        z-index:99999;
+
+        max-width:
+          calc(100vw - 32px);
+
+        padding:
+          12px 18px;
+
+        border-radius:
+          14px;
+
+        background:
+          #123D2B;
+
+        color:
+          white;
+
+        font-size:
+          13px;
+
+        font-weight:
+          700;
+
+        text-align:
+          center;
+
+        box-shadow:
+          0 8px 25px
+          rgba(0,0,0,.2);
+
+        opacity:
+          0;
+
+        pointer-events:
+          none;
+
+        transition:
+          opacity .2s ease;
+
+      `;
+
+
+      document.body
+        .appendChild(
+          toast
+        );
+
+    }
+
+
+    toast.textContent =
+      message;
+
+
+    toast.style.opacity =
+      "1";
+
+
+    clearTimeout(
+      toast._timer
+    );
+
+
+    toast._timer =
+      setTimeout(
+
+        () => {
+
+          toast.style.opacity =
+            "0";
+
+        },
+
+        1800
+
+      );
+
+  }
+
+
+  /* =======================================================
+     CART BADGE
+     ======================================================= */
+
+  function updateCartBadge(
+    count
+  ) {
+
+    const button =
+      $("cartButton");
+
+
+    if (!button) {
+
+      return;
+
+    }
+
+
+    let badge =
+      button.querySelector(
+        ".cart-count"
+      );
+
+
+    if (!badge) {
+
+      badge =
+        document.createElement(
+          "span"
+        );
+
+
+      badge.className =
+        "cart-count";
+
+
+      badge.style.cssText = `
+
+        position:absolute;
+
+        top:-4px;
+
+        right:-4px;
+
+        min-width:19px;
+
+        height:19px;
+
+        padding:0 5px;
+
+        border-radius:20px;
+
+        background:#123D2B;
+
+        color:white;
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+        font-size:10px;
+
+        font-weight:900;
+
+        border:2px solid white;
+
+      `;
+
+
+      button.style.position =
+        "relative";
+
+
+      button.appendChild(
+        badge
+      );
+
+    }
+
+
+    const total =
+      Number(
+        count || 0
+      );
+
+
+    badge.textContent =
+      total > 99
+        ? "99+"
+        : String(total);
+
+
+    badge.style.display =
+      total > 0
+        ? "flex"
+        : "none";
+
+  }
+
+
+  /* =======================================================
+     CART CONNECTION
+     ======================================================= */
+
+  function setupCart() {
+
+    if (
+      !window.AgarwalCart
+    ) {
+
+      return;
+
+    }
+
+
+    const cart =
+      window.AgarwalCart;
+
+
+    updateCartBadge(
+      cart.getItemCount?.() || 0
+    );
+
+
+    window.addEventListener(
+
+      "agarwal:cart-changed",
+
+      event => {
+
+        updateCartBadge(
+
+          event.detail
+            ?.count || 0
+
+        );
+
+      }
+
+    );
+
+  }
+
+
+  setupCart();
+
+
+  /* =======================================================
+     ADD PRODUCT TO CART
+     ======================================================= */
+
+  function setupProductCart() {
+
+    const productUI =
+      window.AgarwalProductUI;
+
+
+    if (!productUI) {
+
+      return;
+
+    }
+
+
+    productUI.addToCart =
+
+      function (
+        productId
+      ) {
+
+        const products =
+
+          store.state
+            ?.products || [];
+
+
+        const product =
+
+          products.find(
+
+            item =>
+
+              String(
+                item?.id
+              ) ===
+
+              String(
+                productId
+              )
+
+          );
+
+
+        if (!product) {
+
+          showMessage(
+            "Product not found."
+          );
+
+          return false;
+
+        }
+
+
+        if (
+          product.outOfStock ===
+          true
+        ) {
+
+          showMessage(
+            "This product is out of stock."
+          );
+
+          return false;
+
+        }
+
+
+        if (
+          !window.AgarwalCart
+        ) {
+
+          showMessage(
+            "Cart is not ready."
+          );
+
+          return false;
+
+        }
+
+
+        try {
+
+          window.AgarwalCart
+            .addProduct(
+              product,
+              1
+            );
+
+
+          showMessage(
+
+            `${product.name || "Product"} added to cart`
+
+          );
+
+
+          return true;
+
+        } catch (error) {
+
+          console.error(
+            "Cart error:",
+            error
+          );
+
+
+          showMessage(
+
+            error.message ||
+            "Could not add product."
+
+          );
+
+
+          return false;
+
+        }
+
+      };
+
+  }
+
+
+  setupProductCart();
 
 
   /* =======================================================
@@ -220,14 +667,13 @@
           .getActive();
 
 
-      window.AgarwalStore
-        .state
+      store.state
         .catalogues =
         catalogues;
 
 
       window.AgarwalCatalogueUI
-        .render(
+        ?.render(
           catalogues
         );
 
@@ -279,14 +725,13 @@
         );
 
 
-      window.AgarwalStore
-        .state
+      store.state
         .products =
         activeProducts;
 
 
       window.AgarwalProductUI
-        .render(
+        ?.render(
           activeProducts
         );
 
@@ -325,242 +770,6 @@
 
 
   /* =======================================================
-     PRODUCT COUNT
-     ======================================================= */
-
-  function updateProductCount(
-    count
-  ) {
-
-    const element =
-      document.getElementById(
-        "productCount"
-      );
-
-
-    if (!element) {
-
-      return;
-
-    }
-
-
-    element.textContent =
-
-      `${count} ${
-        count === 1
-          ? "product"
-          : "products"
-      }`;
-
-  }
-
-
-  /* =======================================================
-     FIX PRODUCT → CART CONNECTION
-     ======================================================= */
-
-  const originalAddToCart =
-
-    window.AgarwalProductUI
-      ?.addToCart;
-
-
-  if (
-    window.AgarwalProductUI
-  ) {
-
-    window.AgarwalProductUI
-      .addToCart =
-
-      function (
-        productId
-      ) {
-
-        const products =
-
-          window.AgarwalStore
-            ?.state
-            ?.products || [];
-
-
-        const product =
-
-          products.find(
-
-            item =>
-
-              String(
-                item?.id
-              ) ===
-
-              String(
-                productId
-              )
-
-          );
-
-
-        if (!product) {
-
-          return false;
-
-        }
-
-
-        if (
-          product.outOfStock ===
-          true
-        ) {
-
-          return false;
-
-        }
-
-
-        try {
-
-          window.AgarwalCart
-            .addProduct(
-              product,
-              1
-            );
-
-
-          showCartMessage(
-            `${product.name || "Product"} added to cart`
-          );
-
-
-          return true;
-
-        } catch (error) {
-
-          console.error(
-            "Cart error:",
-            error
-          );
-
-
-          showCartMessage(
-            error.message ||
-            "Unable to add product."
-          );
-
-
-          return false;
-
-        }
-
-      };
-
-  }
-
-
-  /* =======================================================
-     CART MESSAGE
-     ======================================================= */
-
-  function showCartMessage(
-    message
-  ) {
-
-    let toast =
-      document.getElementById(
-        "agarwalCartToast"
-      );
-
-
-    if (!toast) {
-
-      toast =
-        document.createElement(
-          "div"
-        );
-
-
-      toast.id =
-        "agarwalCartToast";
-
-
-      toast.style.cssText = `
-
-        position:fixed;
-
-        left:50%;
-
-        bottom:22px;
-
-        transform:
-          translateX(-50%);
-
-        z-index:99999;
-
-        padding:12px 18px;
-
-        border-radius:14px;
-
-        background:#123D2B;
-
-        color:white;
-
-        font-size:13px;
-
-        font-weight:700;
-
-        box-shadow:
-          0 8px 25px
-          rgba(0,0,0,.2);
-
-        opacity:0;
-
-        pointer-events:none;
-
-        transition:
-          opacity .2s ease;
-
-      `;
-
-
-      document.body
-        .appendChild(
-          toast
-        );
-
-    }
-
-
-    toast.textContent =
-      message;
-
-
-    toast.style.opacity =
-      "1";
-
-
-    clearTimeout(
-      toast._timer
-    );
-
-
-    toast._timer =
-      setTimeout(
-
-        () => {
-
-          toast.style.opacity =
-            "0";
-
-        },
-
-        1800
-
-      );
-
-  }
-
-
-  /* =======================================================
      CATALOGUE CLICK
      ======================================================= */
 
@@ -571,6 +780,7 @@
     async event => {
 
       const catalogueId =
+
         event.detail
           ?.catalogueId;
 
@@ -593,14 +803,13 @@
             );
 
 
-        window.AgarwalStore
-          .state
+        store.state
           .products =
           products;
 
 
         window.AgarwalProductUI
-          .render(
+          ?.render(
             products
           );
 
@@ -610,10 +819,7 @@
         );
 
 
-        document
-          .getElementById(
-            "productSection"
-          )
+        $("productSection")
           ?.scrollIntoView({
 
             behavior:
@@ -628,8 +834,13 @@
       } catch (error) {
 
         console.error(
-          "Catalogue products failed:",
+          "Catalogue product loading failed:",
           error
+        );
+
+
+        showMessage(
+          "Products could not be loaded."
         );
 
       }
@@ -653,17 +864,15 @@
 
         String(
           event.detail
-            ?.query ||
-          ""
+            ?.query || ""
         )
         .trim()
         .toLowerCase();
 
 
-      const allProducts =
+      const products =
 
-        window.AgarwalStore
-          ?.state
+        store.state
           ?.products || [];
 
 
@@ -671,12 +880,12 @@
 
         window.AgarwalProductUI
           ?.render(
-            allProducts
+            products
           );
 
 
         updateProductCount(
-          allProducts.length
+          products.length
         );
 
 
@@ -687,7 +896,7 @@
 
       const filtered =
 
-        allProducts.filter(
+        products.filter(
 
           product => {
 
@@ -709,6 +918,15 @@
               .toLowerCase();
 
 
+            const description =
+
+              String(
+                product?.description ||
+                ""
+              )
+              .toLowerCase();
+
+
             return (
 
               name.includes(
@@ -716,6 +934,10 @@
               ) ||
 
               unit.includes(
+                query
+              ) ||
+
+              description.includes(
                 query
               )
 
@@ -745,11 +967,22 @@
      CART BUTTON
      ======================================================= */
 
-  document
-    .getElementById(
-      "cartButton"
-    )
-    ?.addEventListener(
+  const cartButton =
+    $("cartButton");
+
+
+  if (
+    cartButton &&
+    !cartButton.dataset
+      .integrationReady
+  ) {
+
+    cartButton.dataset
+      .integrationReady =
+      "true";
+
+
+    cartButton.addEventListener(
 
       "click",
 
@@ -758,33 +991,20 @@
         const count =
 
           window.AgarwalCart
-            ?.getItemCount?.() ||
-
-          0;
+            ?.getItemCount?.() || 0;
 
 
         if (
           count === 0
         ) {
 
-          showCartMessage(
+          showMessage(
             "Your cart is empty."
           );
 
           return;
 
         }
-
-
-        showCartMessage(
-
-          `${count} ${
-            count === 1
-              ? "item"
-              : "items"
-          } in your cart`
-
-        );
 
 
         window.dispatchEvent(
@@ -799,63 +1019,162 @@
 
     );
 
+  }
+
 
   /* =======================================================
-     CART CHANGE LISTENER
+     IMAGE ERROR FALLBACK
      ======================================================= */
 
-  window.addEventListener(
+  document.addEventListener(
 
-    "agarwal:cart-changed",
+    "error",
 
     event => {
 
-      const count =
-        event.detail
-          ?.count || 0;
+      const image =
+        event.target;
 
 
-      const cartButton =
-        document.getElementById(
-          "cartButton"
-        );
-
-
-      if (!cartButton) {
+      if (
+        image?.tagName !==
+        "IMG"
+      ) {
 
         return;
 
       }
 
 
-      cartButton
-        .setAttribute(
-          "data-count",
-          String(
-            count
-          )
+      if (
+        image.dataset
+          .fallbackApplied
+      ) {
+
+        return;
+
+      }
+
+
+      image.dataset
+        .fallbackApplied =
+        "true";
+
+
+      image.style.display =
+        "none";
+
+
+      const parent =
+        image.parentElement;
+
+
+      if (
+        parent &&
+        !parent.querySelector(
+          ".image-fallback"
+        )
+      ) {
+
+        const fallback =
+          document.createElement(
+            "div"
+          );
+
+
+        fallback.className =
+          "image-fallback";
+
+
+        fallback.textContent =
+          "🛒";
+
+
+        fallback.style.cssText = `
+
+          display:flex;
+
+          align-items:center;
+
+          justify-content:center;
+
+          width:100%;
+
+          height:100%;
+
+          min-height:120px;
+
+          font-size:42px;
+
+        `;
+
+
+        parent.appendChild(
+          fallback
         );
 
-    }
+      }
+
+    },
+
+    true
 
   );
 
 
   /* =======================================================
-     INITIAL DATA LOAD
+     REFRESH FUNCTION
      ======================================================= */
 
-  await Promise.all([
+  async function refresh() {
 
-    loadCatalogues(),
+    await Promise.all([
 
-    loadProducts()
+      loadCatalogues(),
 
-  ]);
+      loadProducts()
+
+    ]);
+
+
+    updateCartBadge(
+
+      window.AgarwalCart
+        ?.getItemCount?.() || 0
+
+    );
+
+  }
 
 
   /* =======================================================
-     INTEGRATION READY
+     PUBLIC API
+     ======================================================= */
+
+  window.AgarwalStoreUI = {
+
+    refresh,
+
+    loadCatalogues,
+
+    loadProducts,
+
+    showMessage,
+
+    updateCartBadge
+
+  };
+
+
+  /* =======================================================
+     INITIAL LOAD
+     ======================================================= */
+
+  await refresh();
+
+
+  /* =======================================================
+     READY
      ======================================================= */
 
   window.dispatchEvent(
@@ -868,7 +1187,7 @@
 
 
   console.log(
-    "Agarwal Store UI integration ready."
+    "Agarwal Store — Code 66 ready."
   );
 
 
