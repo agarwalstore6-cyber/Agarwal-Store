@@ -1,90 +1,1171 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-  <meta name="theme-color" content="#123D2B">
-  <meta name="description" content="Agarwal Store - Online grocery shopping in Darbhanga.">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
 
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./assets/logo/logo.svg">
+  <meta
+    name="theme-color"
+    content="#123D2B"
+  >
+
+  <meta
+    name="description"
+    content="Agarwal Store - Online grocery shopping in Darbhanga."
+  >
+
+  <link
+    rel="manifest"
+    href="./manifest.json"
+  >
+
+  <link
+    rel="icon"
+    href="./assets/logo/logo.svg"
+  >
 
   <title>Agarwal Store</title>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+
+    body {
+
+      margin: 0;
+
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      background:
+        #f6f8f6;
+
+      color:
+        #173126;
+
+      -webkit-tap-highlight-color:
+        transparent;
+
+    }
+
+
+    button,
+    input,
+    a {
+
+      font: inherit;
+
+    }
+
+
+    button {
+
+      cursor: pointer;
+
+    }
+
+
+    a {
+
+      text-decoration: none;
+
+    }
+
+
+    /* =====================================================
+       SPLASH
+       ===================================================== */
+
+    #splash {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 9999;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      justify-content: center;
+
+      background:
+        #123D2B;
+
+      color:
+        white;
+
+      transition:
+        opacity .4s ease,
+        visibility .4s ease;
+
+    }
+
+
+    #splash div {
+
+      font-size:
+        28px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        1px;
+
+    }
+
+
+    #splash span {
+
+      width:
+        42px;
+
+      height:
+        4px;
+
+      margin-top:
+        18px;
+
+      border-radius:
+        10px;
+
+      background:
+        white;
+
+      animation:
+        splashLoad 1s infinite ease-in-out;
+
+    }
+
+
+    #splash.hide {
+
+      opacity:
+        0;
+
+      visibility:
+        hidden;
+
+    }
+
+
+    @keyframes splashLoad {
+
+      0% {
+        transform:
+          scaleX(.35);
+      }
+
+      50% {
+        transform:
+          scaleX(1);
+      }
+
+      100% {
+        transform:
+          scaleX(.35);
+      }
+
+    }
+
+
+    /* =====================================================
+       APP
+       ===================================================== */
+
+    #app {
+
+      min-height:
+        100vh;
+
+      opacity:
+        0;
+
+      transition:
+        opacity .5s ease;
+
+    }
+
+
+    #app.ready {
+
+      opacity:
+        1;
+
+    }
+
+
+    /* =====================================================
+       HEADER
+       ===================================================== */
+
+    header {
+
+      position:
+        sticky;
+
+      top:
+        0;
+
+      z-index:
+        100;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        12px;
+
+      padding:
+        14px 16px;
+
+      background:
+        rgba(255,255,255,.96);
+
+      border-bottom:
+        1px solid #e4ebe6;
+
+      backdrop-filter:
+        blur(12px);
+
+    }
+
+
+    header strong {
+
+      flex:
+        1;
+
+      text-align:
+        center;
+
+      font-size:
+        18px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        .5px;
+
+      color:
+        #123D2B;
+
+    }
+
+
+    header button {
+
+      width:
+        44px;
+
+      height:
+        44px;
+
+      border:
+        0;
+
+      border-radius:
+        14px;
+
+      background:
+        #edf4ef;
+
+      font-size:
+        21px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+    }
+
+
+    header button:active {
+
+      transform:
+        scale(.94);
+
+    }
+
+
+    /* =====================================================
+       MAIN
+       ===================================================== */
+
+    main {
+
+      width:
+        min(100%, 1100px);
+
+      margin:
+        auto;
+
+      padding:
+        14px 16px 30px;
+
+    }
+
+
+    /* =====================================================
+       SEARCH
+       ===================================================== */
+
+    .search {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        10px;
+
+      height:
+        50px;
+
+      padding:
+        0 15px;
+
+      margin-bottom:
+        18px;
+
+      border:
+        1px solid #dce6df;
+
+      border-radius:
+        16px;
+
+      background:
+        white;
+
+      box-shadow:
+        0 4px 18px rgba(18,61,43,.06);
+
+    }
+
+
+    .search span {
+
+      font-size:
+        25px;
+
+      color:
+        #668073;
+
+    }
+
+
+    .search input {
+
+      width:
+        100%;
+
+      border:
+        0;
+
+      outline:
+        0;
+
+      background:
+        transparent;
+
+      font-size:
+        15px;
+
+      color:
+        #173126;
+
+    }
+
+
+    .search input::placeholder {
+
+      color:
+        #91a099;
+
+    }
+
+
+    /* =====================================================
+       HERO
+       ===================================================== */
+
+    #banner {
+
+      position:
+        relative;
+
+      overflow:
+        hidden;
+
+      padding:
+        28px 22px;
+
+      margin-bottom:
+        28px;
+
+      border-radius:
+        24px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #123D2B,
+          #1e6044
+        );
+
+      color:
+        white;
+
+      box-shadow:
+        0 14px 35px rgba(18,61,43,.20);
+
+    }
+
+
+    #banner::after {
+
+      content:
+        "";
+
+      position:
+        absolute;
+
+      width:
+        170px;
+
+      height:
+        170px;
+
+      right:
+        -65px;
+
+      top:
+        -65px;
+
+      border-radius:
+        50%;
+
+      background:
+        rgba(255,255,255,.08);
+
+    }
+
+
+    #banner small {
+
+      position:
+        relative;
+
+      z-index:
+        1;
+
+      display:
+        inline-block;
+
+      padding:
+        6px 10px;
+
+      border-radius:
+        20px;
+
+      background:
+        rgba(255,255,255,.13);
+
+      font-size:
+        11px;
+
+      font-weight:
+        800;
+
+      letter-spacing:
+        1px;
+
+    }
+
+
+    #banner h1 {
+
+      position:
+        relative;
+
+      z-index:
+        1;
+
+      margin:
+        16px 0 12px;
+
+      font-size:
+        clamp(30px, 8vw, 52px);
+
+      line-height:
+        1.08;
+
+      letter-spacing:
+        -.8px;
+
+    }
+
+
+    #banner p {
+
+      position:
+        relative;
+
+      z-index:
+        1;
+
+      margin:
+        0;
+
+      font-size:
+        14px;
+
+      line-height:
+        1.6;
+
+      opacity:
+        .92;
+
+    }
+
+
+    /* =====================================================
+       SECTION
+       ===================================================== */
+
+    section {
+
+      margin-bottom:
+        30px;
+
+    }
+
+
+    .heading {
+
+      display:
+        flex;
+
+      align-items:
+        flex-end;
+
+      justify-content:
+        space-between;
+
+      gap:
+        12px;
+
+      margin-bottom:
+        14px;
+
+    }
+
+
+    .heading h2 {
+
+      margin:
+        0;
+
+      font-size:
+        24px;
+
+      color:
+        #173126;
+
+    }
+
+
+    .heading span {
+
+      font-size:
+        12px;
+
+      font-weight:
+        700;
+
+      color:
+        #6c7f75;
+
+    }
+
+
+    /* =====================================================
+       CATALOGUE
+       ===================================================== */
+
+    #catalogueGrid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0,1fr)
+        );
+
+      gap:
+        12px;
+
+    }
+
+
+    .empty {
+
+      grid-column:
+        1 / -1;
+
+      padding:
+        30px 18px;
+
+      text-align:
+        center;
+
+      border:
+        1px dashed #cddbd2;
+
+      border-radius:
+        20px;
+
+      background:
+        white;
+
+      color:
+        #6c7f75;
+
+    }
+
+
+    .empty:first-letter {
+
+      font-size:
+        35px;
+
+    }
+
+
+    .empty h3 {
+
+      margin:
+        12px 0 5px;
+
+      color:
+        #173126;
+
+      font-size:
+        18px;
+
+    }
+
+
+    .empty p {
+
+      margin:
+        0;
+
+      font-size:
+        13px;
+
+    }
+
+
+    /* =====================================================
+       ENQUIRY
+       ===================================================== */
+
+    #enquiry {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        15px;
+
+      padding:
+        22px;
+
+      border-radius:
+        22px;
+
+      background:
+        white;
+
+      border:
+        1px solid #e1e9e4;
+
+      box-shadow:
+        0 8px 25px rgba(18,61,43,.06);
+
+    }
+
+
+    #enquiry small {
+
+      font-size:
+        10px;
+
+      font-weight:
+        900;
+
+      letter-spacing:
+        1px;
+
+      color:
+        #668073;
+
+    }
+
+
+    #enquiry h2 {
+
+      margin:
+        8px 0;
+
+      font-size:
+        20px;
+
+      color:
+        #173126;
+
+    }
+
+
+    #enquiry p {
+
+      margin:
+        0;
+
+      font-weight:
+        800;
+
+      color:
+        #123D2B;
+
+    }
+
+
+    #enquiry a {
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      min-width:
+        76px;
+
+      height:
+        44px;
+
+      padding:
+        0 18px;
+
+      border-radius:
+        13px;
+
+      background:
+        #123D2B;
+
+      color:
+        white;
+
+      font-weight:
+        800;
+
+    }
+
+
+    /* =====================================================
+       FOOTER
+       ===================================================== */
+
+    footer {
+
+      padding:
+        28px 18px 34px;
+
+      text-align:
+        center;
+
+      border-top:
+        1px solid #e0e8e3;
+
+      background:
+        #ffffff;
+
+    }
+
+
+    footer strong {
+
+      display:
+        block;
+
+      color:
+        #123D2B;
+
+      font-size:
+        17px;
+
+      letter-spacing:
+        .5px;
+
+    }
+
+
+    footer p {
+
+      margin:
+        8px 0 16px;
+
+      font-size:
+        13px;
+
+      color:
+        #718179;
+
+    }
+
+
+    footer small {
+
+      display:
+        inline-block;
+
+      padding:
+        7px 10px;
+
+      border-radius:
+        10px;
+
+      color:
+        #718179;
+
+      font-size:
+        11px;
+
+    }
+
+
+    /* =====================================================
+       DESKTOP
+       ===================================================== */
+
+    @media (
+      min-width: 700px
+    ) {
+
+      main {
+
+        padding:
+          22px 24px 45px;
+
+      }
+
+
+      header {
+
+        padding:
+          14px 24px;
+
+      }
+
+
+      #catalogueGrid {
+
+        grid-template-columns:
+          repeat(
+            4,
+            minmax(0,1fr)
+          );
+
+      }
+
+
+      #banner {
+
+        padding:
+          48px;
+
+      }
+
+    }
+
+
+  </style>
+
 </head>
+
 
 <body>
 
+
+  <!-- =====================================================
+       SPLASH
+       ===================================================== -->
+
   <div id="splash">
-    <div>AGARWAL STORE</div>
+
+    <div>
+      AGARWAL STORE
+    </div>
+
     <span></span>
+
   </div>
+
+
+  <!-- =====================================================
+       APP
+       ===================================================== -->
 
   <div id="app">
 
+
+    <!-- ===================================================
+         HEADER
+         =================================================== -->
+
     <header>
-      <button id="profileButton" aria-label="Profile">👤</button>
 
-      <strong>AGARWAL STORE</strong>
+      <button
+        id="profileButton"
+        aria-label="Profile"
+        type="button"
+      >
+        👤
+      </button>
 
-      <button id="cartButton" aria-label="Cart">🛒</button>
+
+      <strong>
+        AGARWAL STORE
+      </strong>
+
+
+      <button
+        id="cartButton"
+        aria-label="Cart"
+        type="button"
+      >
+        🛒
+      </button>
+
     </header>
+
+
+    <!-- ===================================================
+         MAIN
+         =================================================== -->
 
     <main>
 
+
+      <!-- ================================================
+           SEARCH
+           ================================================ -->
+
       <div class="search">
-        <span>⌕</span>
+
+        <span>
+          ⌕
+        </span>
+
+
         <input
           id="searchInput"
           type="search"
           placeholder="Search groceries..."
+          autocomplete="off"
         >
+
       </div>
 
+
+      <!-- ================================================
+           HERO
+           ================================================ -->
+
       <section id="banner">
-        <small>SPECIAL OFFER</small>
-        <h1>Fresh groceries,<br>delivered to your door.</h1>
-        <p>Darbhanga • Free delivery • Cash on delivery</p>
+
+        <small>
+          SPECIAL OFFER
+        </small>
+
+
+        <h1>
+          Fresh groceries,
+          <br>
+          delivered to your door.
+        </h1>
+
+
+        <p>
+          Benta, Darbhanga • Free delivery • Cash on delivery
+        </p>
+
       </section>
+
+
+      <!-- ================================================
+           CATEGORIES
+           ================================================ -->
 
       <section>
+
         <div class="heading">
-          <h2>Shop by category</h2>
-          <span>Agarwal Store</span>
+
+          <h2>
+            Shop by category
+          </h2>
+
+          <span>
+            AGARWAL STORE
+          </span>
+
         </div>
+
 
         <div id="catalogueGrid">
+
           <div class="empty">
+
             🛍️
-            <h3>Categories coming soon</h3>
-            <p>Products and catalogues will appear here.</p>
+
+            <h3>
+              Categories coming soon
+            </h3>
+
+            <p>
+              Products and catalogues will appear here.
+            </p>
+
           </div>
+
         </div>
+
       </section>
+
+
+      <!-- ================================================
+           HELP
+           ================================================ -->
 
       <section id="enquiry">
+
         <div>
-          <small>NEED HELP?</small>
-          <h2>Call for any enquiry</h2>
-          <p>9229609882</p>
+
+          <small>
+            NEED HELP?
+          </small>
+
+          <h2>
+            Call for any enquiry
+          </h2>
+
+          <p>
+            9229609882
+          </p>
+
         </div>
 
-        <a href="tel:+919229609882">Call</a>
+
+        <a
+          href="tel:+919229609882"
+        >
+          Call
+        </a>
+
       </section>
+
 
     </main>
 
+
+    <!-- ===================================================
+         FOOTER
+         =================================================== -->
+
     <footer>
-      <strong>AGARWAL STORE</strong>
-      <p>Online grocery shopping in Darbhanga.</p>
+
+      <strong>
+        AGARWAL STORE
+      </strong>
+
+
+      <p>
+        Online grocery shopping in Benta, Darbhanga.
+      </p>
+
+
       <small id="adminTrigger">
+
         Made by Magician Bhuvan Bhaskar 🪄
+
       </small>
+
     </footer>
+
 
   </div>
 
-  <script type="module" src="./js/app.js"></script>
+
+  <!-- =====================================================
+       APPLICATION
+       ===================================================== -->
+
+  <script
+    type="module"
+    src="./js/app.js"
+  ></script>
+
 
 </body>
+
 </html>
