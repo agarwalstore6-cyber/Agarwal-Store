@@ -1,0 +1,20 @@
+{
+  "name": "Agarwal Store",
+  "short_name": "Agarwal Store",
+  "description": "Agarwal Store - Online grocery shopping in Darbhanga.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#123D2B",
+  "theme_color": "#123D2B",
+
+  "icons": [
+    {
+      "src": "./assets/logo/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
