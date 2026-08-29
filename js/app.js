@@ -1,40 +1,62 @@
 /* =========================================================
    AGARWAL STORE
-   PERMANENT APPLICATION LOADER
+   MAIN APPLICATION LOADER
+   CODE 44 — COMPLETE MODULE INTEGRATION
    ========================================================= */
+
 
 window.AgarwalStore =
   window.AgarwalStore || {};
 
+
 window.AgarwalStore.state =
   window.AgarwalStore.state || {
 
-    currentUser: null,
+    currentUser:
+      null,
 
-    cart: [],
+    cart:
+      [],
 
-    catalogues: [],
+    catalogues:
+      [],
 
-    products: [],
+    products:
+      [],
 
-    banners: [],
+    banners:
+      [],
 
-    currentCatalogue: null,
+    currentCatalogue:
+      null,
 
-    currentProduct: null,
+    currentProduct:
+      null,
 
-    deliveryLocation: null,
+    deliveryLocation:
+      null,
 
-    isAdmin: false
+    deliveryAreas:
+      [],
+
+    settings:
+      null,
+
+    isAdmin:
+      false
 
   };
 
 
 /* =========================================================
-   MODULE LOADER
+   MODULE LIST
    ========================================================= */
 
 const modules = [
+
+  /* -----------------------------------------
+     CORE
+     ----------------------------------------- */
 
   "./firebase.js",
 
@@ -48,113 +70,328 @@ const modules = [
 
   "./auth.js",
 
-  "./customer/profile.js"
+
+  /* -----------------------------------------
+     DATA FOUNDATION
+     ----------------------------------------- */
+
+  "./customer-data.js",
+
+  "./catalogue-data.js",
+
+  "./product-data.js",
+
+  "./banner-data.js",
+
+
+  /* -----------------------------------------
+     CUSTOMER
+     ----------------------------------------- */
+
+  "./customer/profile.js",
+
+  "./customer-storage.js",
+
+  "./customer-session.js",
+
+  "./customer-map.js",
+
+
+  /* -----------------------------------------
+     CART
+     ----------------------------------------- */
+
+  "./cart.js",
+
+
+  /* -----------------------------------------
+     CATALOGUES
+     ----------------------------------------- */
+
+  "./catalogue-products.js",
+
+  "./catalogue-storage.js",
+
+
+  /* -----------------------------------------
+     PRODUCTS
+     ----------------------------------------- */
+
+  "./product-storage.js",
+
+
+  /* -----------------------------------------
+     BANNERS
+     ----------------------------------------- */
+
+  "./banner-slider.js",
+
+  "./banner-storage.js",
+
+
+  /* -----------------------------------------
+     SETTINGS
+     ----------------------------------------- */
+
+  "./settings-storage.js",
+
+  "./settings-runtime.js",
+
+
+  /* -----------------------------------------
+     DELIVERY
+     ----------------------------------------- */
+
+  "./delivery-area.js",
+
+  "./delivery-area-storage.js",
+
+  "./delivery-check.js",
+
+
+  /* -----------------------------------------
+     ORDERS
+     ----------------------------------------- */
+
+  "./order-data.js",
+
+  "./order-validation.js",
+
+  "./order-storage.js",
+
+  "./order-counter.js",
+
+
+  /* -----------------------------------------
+     CLOUDINARY
+     ----------------------------------------- */
+
+  "./cloudinary.js"
 
 ];
 
 
+/* =========================================================
+   MODULE LOADER
+   ========================================================= */
+
 async function loadModules() {
 
-  for (const module of modules) {
+  const loaded = [];
+
+  const failed = [];
+
+
+  for (
+    const module of modules
+  ) {
 
     try {
 
-      await import(module);
+      await import(
+        module
+      );
+
+
+      loaded.push(
+        module
+      );
+
 
       console.log(
         "Agarwal Store loaded:",
         module
       );
 
-    } catch (error) {
+
+    } catch (
+      error
+    ) {
+
+      failed.push({
+
+        module:
+          module,
+
+        error:
+          error
+
+      });
+
 
       console.error(
+
         "Agarwal Store module error:",
+
         module,
+
         error
+
       );
 
     }
 
   }
 
+
+  window.AgarwalStore
+    .modules = {
+
+      loaded,
+
+      failed
+
+    };
+
+
+  window.dispatchEvent(
+
+    new CustomEvent(
+      "agarwal:modules-loaded",
+      {
+        detail: {
+
+          loaded,
+
+          failed
+
+        }
+
+      }
+    )
+
+  );
+
+
+  return {
+
+    loaded,
+
+    failed
+
+  };
+
 }
 
 
 /* =========================================================
-   BASIC EVENTS
+   BASIC PROFILE BUTTON
    ========================================================= */
 
 document
-  .getElementById("profileButton")
+  .getElementById(
+    "profileButton"
+  )
   ?.addEventListener(
+
     "click",
+
     () => {
 
       window.dispatchEvent(
+
         new CustomEvent(
           "agarwal:open-profile"
         )
+
       );
 
     }
-  );
 
-
-document
-  .getElementById("cartButton")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      window.dispatchEvent(
-        new CustomEvent(
-          "agarwal:open-cart"
-        )
-      );
-
-    }
-  );
-
-
-document
-  .getElementById("searchInput")
-  ?.addEventListener(
-    "input",
-    event => {
-
-      window.dispatchEvent(
-        new CustomEvent(
-          "agarwal:search",
-          {
-            detail: {
-              query:
-                event.target.value.trim()
-            }
-          }
-        )
-      );
-
-    }
   );
 
 
 /* =========================================================
-   ADMIN FOOTER — 10 CONSECUTIVE CLICKS
+   CART BUTTON
    ========================================================= */
 
-let footerClicks = 0;
+document
+  .getElementById(
+    "cartButton"
+  )
+  ?.addEventListener(
 
-let footerTimer = null;
+    "click",
+
+    () => {
+
+      window.dispatchEvent(
+
+        new CustomEvent(
+          "agarwal:open-cart"
+        )
+
+      );
+
+    }
+
+  );
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+document
+  .getElementById(
+    "searchInput"
+  )
+  ?.addEventListener(
+
+    "input",
+
+    event => {
+
+      window.dispatchEvent(
+
+        new CustomEvent(
+          "agarwal:search",
+          {
+
+            detail: {
+
+              query:
+                event.target.value
+                  .trim()
+
+            }
+
+          }
+
+        )
+
+      );
+
+    }
+
+  );
+
+
+/* =========================================================
+   ADMIN FOOTER
+   10 CONSECUTIVE CLICKS
+   ========================================================= */
+
+let footerClicks =
+  0;
+
+
+let footerTimer =
+  null;
 
 
 document
-  .getElementById("adminTrigger")
+  .getElementById(
+    "adminTrigger"
+  )
   ?.addEventListener(
+
     "click",
+
     () => {
 
       footerClicks++;
+
 
       clearTimeout(
         footerTimer
@@ -163,56 +400,108 @@ document
 
       footerTimer =
         setTimeout(
+
           () => {
 
-            footerClicks = 0;
+            footerClicks =
+              0;
 
           },
+
           2500
+
         );
 
 
-      if (footerClicks >= 10) {
+      if (
+        footerClicks >= 10
+      ) {
 
-        footerClicks = 0;
+        footerClicks =
+          0;
+
 
         window.dispatchEvent(
+
           new CustomEvent(
             "agarwal:admin-entry"
           )
+
         );
 
       }
 
     }
+
   );
 
 
 /* =========================================================
-   START
+   START APPLICATION
    ========================================================= */
 
-loadModules();
+loadModules()
+  .then(
+
+    result => {
+
+      console.log(
+
+        "Agarwal Store startup complete.",
+
+        result
+
+      );
+
+    }
+
+  )
+  .catch(
+
+    error => {
+
+      console.error(
+
+        "Agarwal Store startup error:",
+
+        error
+
+      );
+
+    }
+
+  );
 
 
 /* =========================================================
-   SPLASH
+   SPLASH SCREEN
    ========================================================= */
 
 setTimeout(
+
   () => {
 
     document
-      .getElementById("splash")
+      .getElementById(
+        "splash"
+      )
       ?.classList
-      .add("hide");
+      .add(
+        "hide"
+      );
 
 
     document
-      .getElementById("app")
+      .getElementById(
+        "app"
+      )
       ?.classList
-      .add("ready");
+      .add(
+        "ready"
+      );
 
   },
+
   4000
+
 );
