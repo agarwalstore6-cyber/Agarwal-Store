@@ -1,35 +1,14 @@
 /* =========================================================
    AGARWAL STORE
-   CODE 2 — APPLICATION FOUNDATION
+   PERMANENT APPLICATION LOADER
    ========================================================= */
 
-const AgarwalStore = {
+window.AgarwalStore =
+  window.AgarwalStore || {};
 
-  version: "1.0.0",
+window.AgarwalStore.state =
+  window.AgarwalStore.state || {
 
-  store: {
-    name: "Agarwal Store",
-
-    address: "Ayachi Nagar, Benta",
-
-    city: "Darbhanga",
-
-    pincode: "846003",
-
-    phone: "9229609882",
-
-    whatsapp: "9229609882",
-
-    minimumOrder: 99,
-
-    deliveryCharge: 0,
-
-    paymentMethod: "Cash on Delivery",
-
-    bannerInterval: 4000
-  },
-
-  state: {
     currentUser: null,
 
     cart: [],
@@ -47,365 +26,193 @@ const AgarwalStore = {
     deliveryLocation: null,
 
     isAdmin: false
+
+  };
+
+
+/* =========================================================
+   MODULE LOADER
+   ========================================================= */
+
+const modules = [
+
+  "./firebase.js",
+
+  "./bootstrap.js",
+
+  "./config.js",
+
+  "./constants.js",
+
+  "./firestore.js",
+
+  "./auth.js",
+
+  "./customer/profile.js"
+
+];
+
+
+async function loadModules() {
+
+  for (const module of modules) {
+
+    try {
+
+      await import(module);
+
+      console.log(
+        "Agarwal Store loaded:",
+        module
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Agarwal Store module error:",
+        module,
+        error
+      );
+
+    }
+
   }
-
-};
-
-
-/* =========================================================
-   MAKE STATE AVAILABLE TO FUTURE MODULES
-   ========================================================= */
-
-window.AgarwalStore = AgarwalStore;
-
-
-/* =========================================================
-   ELEMENTS
-   ========================================================= */
-
-const splash =
-  document.getElementById("splash");
-
-const app =
-  document.getElementById("app");
-
-const profileButton =
-  document.getElementById("profileButton");
-
-const cartButton =
-  document.getElementById("cartButton");
-
-const searchInput =
-  document.getElementById("searchInput");
-
-const catalogueGrid =
-  document.getElementById("catalogueGrid");
-
-const adminTrigger =
-  document.getElementById("adminTrigger");
-
-
-/* =========================================================
-   SPLASH SCREEN
-   ========================================================= */
-
-function startSplash() {
-
-  window.setTimeout(() => {
-
-    if (splash) {
-
-      splash.classList.add("hide");
-
-    }
-
-    if (app) {
-
-      app.classList.add("ready");
-
-    }
-
-  }, 4000);
 
 }
 
 
 /* =========================================================
-   PROFILE EVENT
+   BASIC EVENTS
    ========================================================= */
 
-profileButton?.addEventListener(
-  "click",
-  () => {
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "agarwal:open-profile"
-      )
-    );
-
-  }
-);
-
-
-/* =========================================================
-   CART EVENT
-   ========================================================= */
-
-cartButton?.addEventListener(
-  "click",
-  () => {
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "agarwal:open-cart"
-      )
-    );
-
-  }
-);
-
-
-/* =========================================================
-   SEARCH EVENT
-   ========================================================= */
-
-searchInput?.addEventListener(
-  "input",
-  event => {
-
-    const query =
-      event.target.value.trim();
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "agarwal:search",
-        {
-          detail: {
-            query: query
-          }
-        }
-      )
-    );
-
-  }
-);
-
-
-/* =========================================================
-   ADMIN SECRET BUTTON
-   ========================================================= */
-
-let footerClickCount = 0;
-
-let footerClickTimer = null;
-
-
-adminTrigger?.addEventListener(
-  "click",
-  () => {
-
-    footerClickCount += 1;
-
-    clearTimeout(
-      footerClickTimer
-    );
-
-    footerClickTimer =
-      window.setTimeout(
-        () => {
-
-          footerClickCount = 0;
-
-        },
-        2500
-      );
-
-
-    if (footerClickCount >= 10) {
-
-      footerClickCount = 0;
+document
+  .getElementById("profileButton")
+  ?.addEventListener(
+    "click",
+    () => {
 
       window.dispatchEvent(
         new CustomEvent(
-          "agarwal:admin-entry"
+          "agarwal:open-profile"
         )
       );
 
     }
-
-  }
-);
+  );
 
 
-/* =========================================================
-   CATALOGUE RENDER FOUNDATION
-   ========================================================= */
+document
+  .getElementById("cartButton")
+  ?.addEventListener(
+    "click",
+    () => {
 
-function renderCatalogues(
-  catalogues = []
-) {
-
-  if (!catalogueGrid) {
-
-    return;
-
-  }
-
-
-  AgarwalStore.state.catalogues =
-    catalogues;
-
-
-  if (!catalogues.length) {
-
-    catalogueGrid.innerHTML = `
-      <div class="empty">
-        🛍️
-        <h3>Categories coming soon</h3>
-        <p>
-          Products and catalogues will appear here.
-        </p>
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  catalogueGrid.innerHTML =
-    catalogues
-      .map(catalogue => {
-
-        return `
-          <button
-            class="catalogue-card"
-            data-catalogue-id="${escapeHTML(
-              catalogue.id || ""
-            )}"
-            type="button"
-          >
-
-            ${
-              catalogue.image
-                ? `
-                  <img
-                    src="${escapeHTML(
-                      catalogue.image
-                    )}"
-                    alt="${escapeHTML(
-                      catalogue.name || "Catalogue"
-                    )}"
-                    loading="lazy"
-                  >
-                `
-                : `
-                  <div class="catalogue-placeholder">
-                    🛍️
-                  </div>
-                `
-            }
-
-            <strong>
-              ${escapeHTML(
-                catalogue.name || "Catalogue"
-              )}
-            </strong>
-
-          </button>
-        `;
-
-      })
-      .join("");
-
-
-  catalogueGrid
-    .querySelectorAll(
-      ".catalogue-card"
-    )
-    .forEach(card => {
-
-      card.addEventListener(
-        "click",
-        () => {
-
-          const id =
-            card.dataset.catalogueId;
-
-          window.dispatchEvent(
-            new CustomEvent(
-              "agarwal:catalogue-open",
-              {
-                detail: {
-                  catalogueId: id
-                }
-              }
-            )
-          );
-
-        }
+      window.dispatchEvent(
+        new CustomEvent(
+          "agarwal:open-cart"
+        )
       );
 
-    });
-
-}
-
-
-/* =========================================================
-   SAFE HTML
-   ========================================================= */
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
+    }
+  );
 
 
-/* =========================================================
-   GLOBAL HELPERS
-   ========================================================= */
+document
+  .getElementById("searchInput")
+  ?.addEventListener(
+    "input",
+    event => {
 
-window.AgarwalStoreAPI = {
+      window.dispatchEvent(
+        new CustomEvent(
+          "agarwal:search",
+          {
+            detail: {
+              query:
+                event.target.value.trim()
+            }
+          }
+        )
+      );
 
-  getStoreSettings() {
-
-    return {
-      ...AgarwalStore.store
-    };
-
-  },
-
-
-  getState() {
-
-    return AgarwalStore.state;
-
-  },
-
-
-  setUser(user) {
-
-    AgarwalStore.state.currentUser =
-      user;
-
-  },
-
-
-  setCart(cart) {
-
-    AgarwalStore.state.cart =
-      Array.isArray(cart)
-        ? cart
-        : [];
-
-  },
-
-
-  renderCatalogues
-
-};
+    }
+  );
 
 
 /* =========================================================
-   APPLICATION START
+   ADMIN FOOTER — 10 CONSECUTIVE CLICKS
    ========================================================= */
 
-startSplash();
+let footerClicks = 0;
+
+let footerTimer = null;
+
+
+document
+  .getElementById("adminTrigger")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      footerClicks++;
+
+      clearTimeout(
+        footerTimer
+      );
+
+
+      footerTimer =
+        setTimeout(
+          () => {
+
+            footerClicks = 0;
+
+          },
+          2500
+        );
+
+
+      if (footerClicks >= 10) {
+
+        footerClicks = 0;
+
+        window.dispatchEvent(
+          new CustomEvent(
+            "agarwal:admin-entry"
+          )
+        );
+
+      }
+
+    }
+  );
 
 
 /* =========================================================
-   FOUNDATION READY EVENT
+   START
    ========================================================= */
 
-window.dispatchEvent(
-  new CustomEvent(
-    "agarwal:foundation-ready"
-  )
+loadModules();
+
+
+/* =========================================================
+   SPLASH
+   ========================================================= */
+
+setTimeout(
+  () => {
+
+    document
+      .getElementById("splash")
+      ?.classList
+      .add("hide");
+
+
+    document
+      .getElementById("app")
+      ?.classList
+      .add("ready");
+
+  },
+  4000
 );
